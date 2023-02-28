@@ -12,10 +12,13 @@ import AdbIcon from "@mui/icons-material/Adb";
 import { logout } from "../../store/slices/userSlice";
 
 const userPages = [
-  { name: "My Books", path: "lms/mybooks" },
-  { name: "My Requests", path: "lms/myrequests" },
+  { name: "Book Loans", path: "lms/mybooks" },
+  { name: "Book Requests", path: "lms/myrequests" },
 ];
-const librarianPages = ["Books Loans", "Book Requests"];
+const librarianPages = [
+  { name: "Book Loans", path: "lms/mybooks" },
+  { name: "Book Requests", path: "lms/myrequests" },
+];
 
 function ResponsiveAppBar() {
   const [pages, setPages] = useState([]);

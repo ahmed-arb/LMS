@@ -15,8 +15,8 @@ import PageNotFound from "./pages/404/PageNotFound";
 import httpIntercept from "./interceptor/interceptor";
 import { setCredentials } from "./store/slices/userSlice";
 import Home from "./pages/home/Home";
-import MyBooks from "./pages/my_books/MyBooks";
-import MyRequests from "./pages/my_requests/MyRequests";
+import MyBooks from "./pages/book_loans/BookLoans";
+import MyRequests from "./pages/book_requests/BookRequests";
 
 function App() {
   httpIntercept();
