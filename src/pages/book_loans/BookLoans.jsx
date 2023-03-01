@@ -16,23 +16,35 @@ import DialogContent from "@mui/material/DialogContent";
 import { useSelector } from "react-redux";
 
 import BookLoanForm from "../../components/forms/BookLoanForm";
-
+import { toast } from "react-toastify";
 
 const MyBooks = () => {
   const [loans, setLoans] = useState([]);
   const [defaultValue, setDefaultValue] = useState(null);
+  const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
 
   const { userInfo } = useSelector((state) => state.user);
-  
+
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setReload(Math.random());
+  };
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/loans`).then(({ data }) => {
       setLoans(data);
     });
-  }, []);
+  }, [reload]);
+
+  const handleRemind = (id) => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/loans/${id}/`)
+      .then((data) => {
+        toast.success("Reminder email sent.");
+      });
+  };
   return (
     <Box
       sx={{
@@ -73,16 +85,22 @@ const MyBooks = () => {
                 </TableCell>
                 {userInfo?.is_librarian && (
                   <TableCell align="right">
-                    {" "}
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={()=>{
-                        setDefaultValue(row)
-                        handleOpen(true)
+                      onClick={() => {
+                        setDefaultValue(row);
+                        handleOpen();
                       }}
                     >
                       Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleRemind(row.id)}
+                    >
+                      remind
                     </Button>
                   </TableCell>
                 )}
@@ -93,7 +111,7 @@ const MyBooks = () => {
       </TableContainer>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
-          <BookLoanForm bookLoan={defaultValue} handleClose={handleClose}/>
+          <BookLoanForm bookLoan={defaultValue} handleClose={handleClose} />
         </DialogContent>
       </Dialog>
     </Box>

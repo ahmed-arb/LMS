@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -15,8 +15,13 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 
+import axios from "axios";
+import {toast} from 'react-toastify'
+import { useNavigate } from "react-router-dom";
+
 export default function SignUp() {
-  const [gender, setGender] = React.useState("");
+  const [gender, setGender] = useState("");
+  const navigate = useNavigate()
 
   const handleChange = (event) => {
     setGender(event.target.value);
@@ -24,9 +29,15 @@ export default function SignUp() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
+    var newUser = Object.fromEntries(data)
+    newUser.gender = gender
+    axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/auth/users/`,
+      newUser
+    ).then(({data})=>{
+      console.log(data)
+      toast.success("Welcome to the greatest library ever! try logging in.")
+      navigate("/login");
     });
   };
 
@@ -47,15 +58,15 @@ export default function SignUp() {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 autoComplete="given-name"
-                name="firstName"
+                name="first_name"
                 required
                 fullWidth
-                id="firstName"
+                id="first_name"
                 label="First Name"
                 autoFocus
               />
@@ -64,10 +75,19 @@ export default function SignUp() {
               <TextField
                 required
                 fullWidth
-                id="lastName"
+                id="first_name"
                 label="Last Name"
-                name="lastName"
+                name="last_name"
                 autoComplete="family-name"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="username"
+                label="username"
+                name="username"
               />
             </Grid>
             <Grid item xs={12}>
@@ -101,8 +121,8 @@ export default function SignUp() {
                   label="Gender"
                   onChange={handleChange}
                 >
-                  <MenuItem value="m">Male</MenuItem>
-                  <MenuItem value="f">Female</MenuItem>
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
                   <MenuItem value="other">Other</MenuItem>
                 </Select>
               </FormControl>

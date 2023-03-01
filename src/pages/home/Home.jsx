@@ -9,9 +9,12 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const Home = () => {
   const [books, setBooks] = useState([]);
+  const { authToken } = useSelector((state) => state.user);
+
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/books`).then(({ data }) => {
       setBooks(data);
@@ -64,15 +67,17 @@ const Home = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button
-                  disabled={item.stock === 0}
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={() => handleLoan(item.id)}
-                >
-                  Loan
-                </Button>
+                {authToken && (
+                  <Button
+                    disabled={item.stock === 0}
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={() => handleLoan(item.id)}
+                  >
+                    Loan
+                  </Button>
+                )}
               </CardActions>
             </Card>
           </Grid>

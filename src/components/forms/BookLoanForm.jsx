@@ -24,7 +24,6 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
   const [dateReturned, setDateReturned] = useState(null);
 
   useEffect(() => {
-    console.log(bookLoan);
     setStatus(bookLoan.status);
     setDateBorrowed(bookLoan.date_borrowed);
     setDateDue(bookLoan.date_due);
@@ -63,7 +62,7 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
       }}
     >
       <Typography component="h1" variant="h5">
-        Sign up
+       Book Loan Form
       </Typography>
       <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
         <Grid container spacing={2}>

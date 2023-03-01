@@ -3,9 +3,13 @@ import axios from "axios";
 const httpIntercept = (props) => {
   axios.interceptors.request.use(
     (request) => {
-      if (request.url.includes(process.env.REACT_APP_BACKEND_URL)) {
+      const authToken = localStorage.getItem("authToken");
+      if (
+        request.url.includes(process.env.REACT_APP_BACKEND_URL) &&
+        authToken
+      ) {
         request.headers.Authorization =
-          "JWT " + localStorage.getItem("authToken");
+          "JWT " + authToken;
       }
       return request;
     },
