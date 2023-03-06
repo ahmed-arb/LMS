@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { ToastContainer } from "react-toastify";
-import axios from "axios";
 
 import "react-toastify/dist/ReactToastify.css";
 
@@ -17,37 +16,43 @@ import { setCredentials } from "./store/slices/userSlice";
 import Home from "./pages/home/Home";
 import MyBooks from "./pages/book_loans/BookLoans";
 import MyRequests from "./pages/book_requests/BookRequests";
+import useHttp from "./hooks/use-https";
 
 function App() {
   httpIntercept();
 
   const { authToken } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { sendRequest } = useHttp();
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      axios
-        .get(`${process.env.REACT_APP_BACKEND_URL}/auth/users/me`)
-        .then(({ data }) => {
+
+      sendRequest(
+        {
+          url: "auth/users/me/",
+        },
+        (data) => {
           dispatch(setCredentials(data));
-        });
+        }
+      );
     }
-  }, [dispatch, authToken]);
+  }, [dispatch, authToken, sendRequest]);
 
   return (
     <Fragment>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/*" element={<PageNotFound />} />
-          <Route path="/" exact element={<Home/>}/>
+          <Route path="/" exact element={<Home />} />
 
           <Route path="/login" exact element={<Login />} />
           <Route path="/register" exact element={<Register />} />
 
-          <Route path="/lms" element={<PrivateRoute />}>         
-              <Route path="mybooks" exact element={<MyBooks />} />
-              <Route path="myrequests" exact element={<MyRequests />} />
+          <Route path="/lms" element={<PrivateRoute />}>
+            <Route path="mybooks" exact element={<MyBooks />} />
+            <Route path="myrequests" exact element={<MyRequests />} />
           </Route>
         </Route>
       </Routes>

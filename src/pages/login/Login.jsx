@@ -23,6 +23,7 @@ export default function SignIn() {
   // redirect authenticated user to profile screen
   useEffect(() => {
     if (userInfo) {
+      console.log("first")
       navigate("/");
     }
   }, [navigate, userInfo]);

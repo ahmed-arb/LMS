@@ -13,6 +13,7 @@ export const userLogin = createAsyncThunk(
       localStorage.setItem("authToken", data.access);
       return data;
     } catch (error) {
+      console.log("error")
       if (error.response && error.response.data.detail) {
         return rejectWithValue(error.response.data);
       } else {

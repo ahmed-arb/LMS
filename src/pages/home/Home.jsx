@@ -7,34 +7,37 @@ import CardMedia from "@mui/material/CardMedia";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import useHttp from "../../hooks/use-https";
 
 const Home = () => {
   const [books, setBooks] = useState([]);
   const { authToken } = useSelector((state) => state.user);
+  const { sendRequest } = useHttp();
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/books`).then(({ data }) => {
+    sendRequest({ url: "books/" }, (data) => {
       setBooks(data);
     });
-  }, []);
+  }, [sendRequest]);
 
   const handleLoan = (bookId) => {
-    axios
-      .post(`${process.env.REACT_APP_BACKEND_URL}/loans/`, {
-        book: bookId,
-        status: "requested",
-      })
-      .then(({ data }) => {
+    sendRequest(
+      {
+        url: "loans/",
+        method: "POST",
+        body: {
+          book: bookId,
+          status: "requested",
+        },
+      },
+      (data) => {
         toast.success(
           'Book loan successful. You can track your loan in "Book Loans".'
         );
-      })
-      .catch((err) => {
-        toast.error(err.msg);
-      });
+      }
+    );
   };
   return (
     <Box

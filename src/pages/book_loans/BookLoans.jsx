@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -17,6 +16,7 @@ import { useSelector } from "react-redux";
 
 import BookLoanForm from "../../components/forms/BookLoanForm";
 import { toast } from "react-toastify";
+import useHttp from "../../hooks/use-https";
 
 const MyBooks = () => {
   const [loans, setLoans] = useState([]);
@@ -25,6 +25,7 @@ const MyBooks = () => {
   const [open, setOpen] = useState(false);
 
   const { userInfo } = useSelector((state) => state.user);
+  const { sendRequest } = useHttp();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -33,17 +34,25 @@ const MyBooks = () => {
   };
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/loans`).then(({ data }) => {
-      setLoans(data);
-    });
-  }, [reload]);
+    sendRequest(
+      {
+        url: "loans",
+      },
+      (data) => {
+        setLoans(data);
+      }
+    );
+  }, [reload, sendRequest]);
 
   const handleRemind = (id) => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/loans/${id}/`)
-      .then((data) => {
+    sendRequest(
+      {
+        url: `loans/${id}/`,
+      },
+      (data) => {
         toast.success("Reminder email sent.");
-      });
+      }
+    );
   };
   return (
     <Box

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -13,22 +13,17 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
-import axios from "axios";
 import { toast } from "react-toastify";
 import moment from "moment";
+import { bookLoanStatusOptions } from "../../constants";
+import useHttp from "../../hooks/use-https";
 
 const BookLoanForm = ({ bookLoan, handleClose }) => {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(null);
   const [dateBorrowed, setDateBorrowed] = useState(null);
   const [dateDue, setDateDue] = useState(null);
   const [dateReturned, setDateReturned] = useState(null);
-
-  useEffect(() => {
-    setStatus(bookLoan.status);
-    setDateBorrowed(bookLoan.date_borrowed);
-    setDateDue(bookLoan.date_due);
-    setDateReturned(bookLoan.date_returned);
-  }, [bookLoan]);
+  const { sendRequest, isLoading } = useHttp();
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -36,21 +31,29 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    axios
-      .put(`${process.env.REACT_APP_BACKEND_URL}/loans/${bookLoan.id}/`, {
-        book: bookLoan.book.id,
-        status: status,
-        date_borrowed: moment(dateBorrowed).format("YYYY-MM-DD"),
-        date_due:  moment(dateDue).format("YYYY-MM-DD"),
-        date_returned: moment(dateReturned).format("YYYY-MM-DD"),
-      })
-      .then(({ data }) => {
-        toast.success("Book loan updated successfully.");
-      })
-      .catch((err) => {
-        toast.error(err.msg);
-      });
-      handleClose()
+    sendRequest(
+      {
+        url: `loans/${bookLoan.id}/`,
+        method: "PUT",
+        body: {
+          book: bookLoan.book.id,
+          status: status ?? bookLoan.status,
+          date_borrowed: dateBorrowed
+            ? moment(dateBorrowed).format("YYYY-MM-DD")
+            : bookLoan.date_borrowed,
+          date_due: dateDue
+            ? moment(dateDue).format("YYYY-MM-DD")
+            : bookLoan.date_due,
+          date_returned: dateReturned
+            ? moment(dateReturned).format("YYYY-MM-DD")
+            : bookLoan.date_returned,
+        },
+      },
+      (data) => {
+        toast.success("yay");
+        handleClose();
+      }
+    );
   };
 
   return (
@@ -62,7 +65,7 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
       }}
     >
       <Typography component="h1" variant="h5">
-       Book Loan Form
+        Book Loan Form
       </Typography>
       <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
         <Grid container spacing={2}>
@@ -72,23 +75,23 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
               <Select
                 labelId="status-select-label"
                 id="status-select"
-                value={status}
+                value={status ?? bookLoan?.status}
                 label="Status"
                 onChange={handleStatusChange}
               >
-                <MenuItem value="requested">Requested</MenuItem>
-                <MenuItem value="issued">Issued</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
-                <MenuItem value="returned">Returned</MenuItem>
+                {bookLoanStatusOptions.map((option) => (
+                  <MenuItem value={option.value}>{option.display}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
           <LocalizationProvider dateAdapter={AdapterMoment}>
             <Grid item xs={6}>
               <DesktopDatePicker
+              
                 label="Date Borrowed"
                 inputFormat="MM/DD/YYYY"
-                value={dateBorrowed}
+                value={dateBorrowed ?? bookLoan?.date_borrowed}
                 onChange={setDateBorrowed}
                 renderInput={(params) => <TextField {...params} />}
               />
@@ -97,7 +100,7 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
               <DesktopDatePicker
                 label="Date Due"
                 inputFormat="MM/DD/YYYY"
-                value={dateDue}
+                value={dateDue ?? bookLoan?.date_due}
                 onChange={setDateDue}
                 renderInput={(params) => <TextField {...params} />}
               />
@@ -106,7 +109,7 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
               <DesktopDatePicker
                 label="Date Returned"
                 inputFormat="MM/DD/YYYY"
-                value={dateReturned}
+                value={dateReturned ?? bookLoan?.date_returned}
                 onChange={(value) => {
                   setDateReturned(value);
                 }}
@@ -115,7 +118,12 @@ const BookLoanForm = ({ bookLoan, handleClose }) => {
             </Grid>
           </LocalizationProvider>
         </Grid>
-        <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2 }}>
+        <Button
+          disabled={isLoading}
+          type="submit"
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+        >
           Update
         </Button>
       </Box>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -6,42 +6,42 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
-import axios from "axios";
 import { toast } from "react-toastify";
+import useHttp from "../../hooks/use-https";
 
 const UserBookRequestForm = ({ defaultValue, handleClose }) => {
+  const { sendRequest } = useHttp();
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
     if (defaultValue) {
-      axios
-        .put(
-          `${process.env.REACT_APP_BACKEND_URL}/book_requests/${defaultValue.id}/`,
-          {
+      sendRequest(
+        {
+          url: `book_requests/${defaultValue.id}/`,
+          method: "PUT",
+          body: {
             book_name: data.get("book_name"),
-          }
-        )
-        .then(({ data }) => {
+          },
+        },
+        (data) => {
           toast.success("Book request updated successfully.");
           handleClose();
-        })
-        .catch((err) => {
-          toast.error(err.detail);
-        });
+        }
+      );
     } else {
-      axios
-        .post(`${process.env.REACT_APP_BACKEND_URL}/book_requests/`, {
-          book_name: data.get("book_name"),
-        })
-        .then(({ data }) => {
+      sendRequest(
+        {
+          url: "book_requests/",
+          method: "POST",
+          body: { book_name: data.get("book_name") },
+        },
+        (data) => {
           toast.success("Book request created successfully.");
           handleClose();
-        })
-        .catch((err) => {
-          toast.error(err.detail);
-        });
+        }
+      );
     }
   };
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -18,12 +17,15 @@ import { useSelector } from "react-redux";
 import UserBookRequestForm from "../../components/forms/UserBookRequestForm";
 import LibBookRequestForm from "../../components/forms/LibBookRequestForm";
 import moment from "moment";
+import useHttp from "../../hooks/use-https";
 
 const MyRequests = () => {
   const [requests, setRequests] = useState([]);
   const [defaultValue, setDefaultValue] = useState(null);
   const [reload, setReload] = useState(0);
   const [open, setOpen] = useState(false);
+
+  const { sendRequest } = useHttp();
 
   const { userInfo } = useSelector((state) => state.user);
 
@@ -35,12 +37,10 @@ const MyRequests = () => {
   };
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BACKEND_URL}/book_requests`)
-      .then(({ data }) => {
-        setRequests(data);
-      });
-  }, [reload]);
+    sendRequest({ url: "book_requests/" }, (data) => {
+      setRequests(data);
+    });
+  }, [reload, sendRequest]);
   return (
     <Grid
       sx={{

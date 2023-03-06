@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import TextareaAutosize from "@mui/base/TextareaAutosize";
+import InputLabel from "@mui/material/InputLabel";
 
-import axios from "axios";
 import { toast } from "react-toastify";
+import { bookRequestStatusOptions } from "../../constants";
+import useHttp from "../../hooks/use-https";
 
 const BookLoanForm = ({ defaultValue, handleClose }) => {
-  const [status, setStatus] = useState(defaultValue?.status);
-  const [reason, setReason] = useState(defaultValue?.reason);
+  const [status, setStatus] = useState(null);
+  const [reason, setReason] = useState(null);
+  const { sendRequest, isLoading } = useHttp();
 
   const handleStatusChange = (event) => {
     setStatus(event.target.value);
@@ -24,24 +25,21 @@ const BookLoanForm = ({ defaultValue, handleClose }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
 
-    axios
-      .patch(
-        `${process.env.REACT_APP_BACKEND_URL}/book_requests/${defaultValue.id}/`,
-        {
-        //   ...defaultValue,
-          status,
-          reason,
-        }
-      )
-      .then(({ data }) => {
+    sendRequest(
+      {
+        url: `book_requests/${defaultValue.id}/`,
+        method: "PATCH",
+        body: {
+          status: status ?? defaultValue.status,
+          reason: reason ?? defaultValue.reason,
+        },
+      },
+      (data) => {
         toast.success("Book request updated successfully.");
         handleClose();
-      })
-      .catch((err) => {
-        toast.error(err.detail);
-      });
+      }
+    );
   };
 
   return (
@@ -63,13 +61,13 @@ const BookLoanForm = ({ defaultValue, handleClose }) => {
               <Select
                 labelId="status-select-label"
                 id="status-select"
-                value={status}
+                value={status ?? defaultValue?.status}
                 label="Status"
                 onChange={handleStatusChange}
               >
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="approved">Approved</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
+                {bookRequestStatusOptions.map((option) => (
+                  <MenuItem value={option.value}>{option.display}</MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -80,13 +78,18 @@ const BookLoanForm = ({ defaultValue, handleClose }) => {
               minRows={10}
               placeholder="Reason for rejection"
               style={{ width: 400 }}
-              value={reason}
+              value={reason ?? defaultValue?.reason}
               disabled={status !== "rejected"}
               onChange={(event) => setReason(event.target.value)}
             />
           </Grid>
         </Grid>
-        <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2 }}>
+        <Button
+          disabled={isLoading}
+          type="submit"
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+        >
           Update
         </Button>
       </Box>

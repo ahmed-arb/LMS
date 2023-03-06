@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -15,13 +15,15 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 
-import axios from "axios";
-import {toast} from 'react-toastify'
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { userGenderOptions } from "../../constants";
+import useHttp from "../../hooks/use-https";
 
 export default function SignUp() {
   const [gender, setGender] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { sendRequest } = useHttp();
 
   const handleChange = (event) => {
     setGender(event.target.value);
@@ -29,16 +31,16 @@ export default function SignUp() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    var newUser = Object.fromEntries(data)
-    newUser.gender = gender
-    axios.post(
-      `${process.env.REACT_APP_BACKEND_URL}/auth/users/`,
-      newUser
-    ).then(({data})=>{
-      console.log(data)
-      toast.success("Welcome to the greatest library ever! try logging in.")
-      navigate("/login");
-    });
+    var newUser = Object.fromEntries(data);
+    newUser.gender = gender;
+
+    sendRequest(
+      { url: "auth/users/", method: "POST", body: newUser },
+      (data) => {
+        toast.success("Welcome to the greatest library ever! try logging in.");
+        navigate("/login");
+      }
+    );
   };
 
   return (
@@ -121,9 +123,9 @@ export default function SignUp() {
                   label="Gender"
                   onChange={handleChange}
                 >
-                  <MenuItem value="male">Male</MenuItem>
-                  <MenuItem value="female">Female</MenuItem>
-                  <MenuItem value="other">Other</MenuItem>
+                  {userGenderOptions.map((option) => (
+                    <MenuItem value={option.value}>{option.display}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
